@@ -1,6 +1,7 @@
 import { useState } from "react";
 import * as React from "react";
 import { FaCheck } from "react-icons/fa6";
+import bsodImage from "./assets/bsod.png";
 
 function generateRandomHexCodes(count = 100) {
   const hexCodes = [];
@@ -85,7 +86,6 @@ function Dropdown({
 
 const hexCodes = generateRandomHexCodes();
 
-// Define stages configuration - easy to add, remove, or reorder!
 const stageConfig = [
   {
     id: "username",
@@ -134,6 +134,63 @@ const stageConfig = [
     },
   },
   {
+    id: "captcha",
+    type: "input",
+    placeholder: "Prove you're human: What's 9 + 10?",
+    validator: (value: string) => {
+      console.log(value);
+
+      return value === "21";
+    },
+  },
+  {
+    id: "philosophyQuestion",
+    type: "dropdown",
+    placeholder: "What is the meaning of life?",
+    options: ["42", "To be or not to be", "Pineapple"],
+    validator: (value: string) => value === "42",
+    onInvalidValue: (e: React.ChangeEvent<HTMLSelectElement>) => {
+      alert("Wrong answer! Try again.");
+    },
+  },
+  {
+    id: "mysteryCheckbox",
+    type: "checkbox",
+    text: "I solemnly swear I am up to no good",
+  },
+  {
+    id: "timeTravel",
+    type: "input",
+    placeholder: "Enter the year you were born (or will be born)",
+    validator: (value: string) => {
+      const year = parseInt(value, 10);
+      return year > 1900 && year < 3000;
+    },
+    onInvalidValue: () => {
+      alert("That doesn't seem like a valid year.");
+    },
+  },
+  {
+    id: "riddle",
+    type: "input",
+    placeholder: "What has keys but can't open locks?",
+    validator: (value: string) => value.toLowerCase() === "keyboard",
+    onInvalidValue: () => {
+      alert("Think harder! It's something you use every day.");
+    },
+  },
+  {
+    id: "colorGuess",
+    type: "dropdown",
+    placeholder: "Guess the secret color",
+    options: ["Red", "Blue", "Green", "Yellow"],
+    validator: (value: string) => value === "Blue",
+    onInvalidValue: (e: React.ChangeEvent<HTMLSelectElement>) => {
+      alert("Nope, try again!");
+      e.target.value = "";
+    },
+  },
+  {
     id: "tos",
     type: "checkbox",
     text: "I agree to the terms of service",
@@ -149,10 +206,7 @@ const stageConfig = [
     text: "Sign up",
     className: "bg-red-500 w-96 p-4 rounded-full",
     onClick: () => {
-      setTimeout(() => {
-        alert("There has been an error. Please resubmit this form");
-        window.location.reload();
-      }, 5000);
+      window.location.reload();
     },
   },
 ];
@@ -162,6 +216,7 @@ function App() {
     new Set()
   );
   const [formData, setFormData] = useState<Record<string, any>>({});
+  const [showBsod, setShowBsod] = useState(false);
 
   const completeStage = (stageId: string, value?: any) => {
     setCompletedStages((prev) => new Set([...prev, stageId]));
@@ -173,7 +228,6 @@ function App() {
   const isStageVisible = (index: number) => {
     if (index === 0) return true;
 
-    // Check if all previous stages are completed
     for (let i = 0; i < index; i++) {
       const prevStage = stageConfig[i];
       if (prevStage.type !== "header" && !completedStages.has(prevStage.id)) {
@@ -251,7 +305,7 @@ function App() {
           <button
             key={stage.id}
             className={stage.className}
-            onClick={stage.onClick}
+            onClick={() => setShowBsod(true)}
           >
             {stage.text}
           </button>
@@ -264,11 +318,23 @@ function App() {
 
   return (
     <main className="py-4 h-screen w-screen flex flex-col gap-8">
-      <h1 className="text-4xl text-center">Welcome to T̵̼͍̤̝̃͋̒͆H̴̬̭̹͖̙̽́̐͝͝E̴̖͕͉̥̎̈́ͅ ̶̻̣̏͛͛̊Ẅ̸̙͈͖̝̝́͐E̴̺̤͓͎̫̓B̵̢̖̎̒S̷̹̻͍̬̈́̃͑͠͝Ḭ̷̛T̸̘̬̭̹̱̊͆̕͝E̸͈̕</h1>
+      {showBsod ? (
+        <div className="w-screen h-screen flex items-center justify-center absolute left-0 top-0">
+          <img
+            src={bsodImage}
+            alt="BSOD"
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <>
+          <h1 className="text-4xl text-center">Welcome to T̵̼͍̤̝̃͋̒͆H̴̬̭̹͖̙̽́̐͝͝E̴̖͕͉̥̎̈́ͅ ̶̻̣̏͛͛̊Ẅ̸̙͈͖̝̝́͐E̴̺̤͓͎̫̓B̵̢̖̎̒S̷̹̻͍̬̈́̃͑͠͝Ḭ̷̛T̸̘̬̭̹̱̊͆̕͝E̸͈̕</h1>
 
-      <div className="w-full h-full flex flex-col items-center gap-4">
-        {stageConfig.map((stage, index) => renderStage(stage, index))}
-      </div>
+          <div className="w-full h-full flex flex-col items-center gap-4">
+            {stageConfig.map((stage, index) => renderStage(stage, index))}
+          </div>
+        </>
+      )}
     </main>
   );
 }
