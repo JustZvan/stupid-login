@@ -1,5 +1,6 @@
 import { useState } from "react";
 import * as React from "react";
+import { FaCheck } from "react-icons/fa6";
 
 function generateRandomHexCodes(count = 100) {
   const hexCodes = [];
@@ -9,6 +10,29 @@ function generateRandomHexCodes(count = 100) {
     hexCodes.push(hexCode.toUpperCase());
   }
   return hexCodes;
+}
+
+function Checkbox({
+  text,
+  onChange,
+  checked,
+}: {
+  text: string;
+  onChange: (value: boolean) => void;
+  checked: boolean;
+}) {
+  return (
+    <div className="flex gap-2">
+      <button
+        className="bg-zinc-800 rounded w-6 aspect-square flex items-center justify-center"
+        onClick={() => onChange(!checked)}
+      >
+        {checked && <FaCheck className="text-white" />}
+      </button>
+
+      <div className="text-zinc-400">{text}</div>
+    </div>
+  );
 }
 
 function Input({
@@ -68,6 +92,10 @@ function App() {
     password: false,
     colorSecurityQ: false,
     gamblingSecurityQ: false,
+
+    // checkboxes
+    tos: false,
+    pineappleOnPizza: false, // im sorry for this.
   });
 
   return (
@@ -141,6 +169,29 @@ function App() {
               />
             )}
           </div>
+        )}
+
+        {stage.gamblingSecurityQ && (
+          <Checkbox
+            text="I agree to the terms of service"
+            onChange={(checked) => {
+              setStage({ ...stage, tos: checked });
+            }}
+            checked={stage.tos}
+          />
+        )}
+        {stage.tos && (
+          <Checkbox
+            text="I agree that pineapple on pizza is good"
+            onChange={(checked) => {
+              setStage({ ...stage, pineappleOnPizza: checked });
+            }}
+            checked={stage.pineappleOnPizza}
+          />
+        )}
+
+        {stage.pineappleOnPizza && (
+          <button className="bg-red-500 w-96 p-4 rounded-full">Sign up</button>
         )}
       </div>
     </main>
