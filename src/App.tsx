@@ -191,7 +191,18 @@ function App() {
         )}
 
         {stage.pineappleOnPizza && (
-          <button className="bg-red-500 w-96 p-4 rounded-full">Sign up</button>
+          <button
+            className="bg-red-500 w-96 p-4 rounded-full"
+            onClick={() => {
+              setTimeout(() => {
+                alert("There has been an error. Please resubmit this form");
+
+                window.location.reload();
+              }, 5000);
+            }}
+          >
+            Sign up
+          </button>
         )}
       </div>
     </main>
