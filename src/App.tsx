@@ -149,7 +149,7 @@ const stageConfig = [
     placeholder: "What is the meaning of life?",
     options: ["42", "To be or not to be", "Pineapple"],
     validator: (value: string) => value === "42",
-    onInvalidValue: (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onInvalidValue: () => {
       alert("Wrong answer! Try again.");
     },
   },
@@ -215,14 +215,11 @@ function App() {
   const [completedStages, setCompletedStages] = useState<Set<string>>(
     new Set()
   );
-  const [formData, setFormData] = useState<Record<string, any>>({});
+
   const [showBsod, setShowBsod] = useState(false);
 
-  const completeStage = (stageId: string, value?: any) => {
+  const completeStage = (stageId: string) => {
     setCompletedStages((prev) => new Set([...prev, stageId]));
-    if (value !== undefined) {
-      setFormData((prev) => ({ ...prev, [stageId]: value }));
-    }
   };
 
   const isStageVisible = (index: number) => {
@@ -249,7 +246,7 @@ function App() {
             type={stage.inputType}
             onChange={(e) => {
               if (stage.validator(e.target.value)) {
-                completeStage(stage.id, e.target.value);
+                completeStage(stage.id);
               }
             }}
           />
@@ -267,7 +264,7 @@ function App() {
                 return;
               }
               if (stage.validator(e.target.value)) {
-                completeStage(stage.id, e.target.value);
+                completeStage(stage.id);
               }
             }}
           />
@@ -280,7 +277,7 @@ function App() {
             text={stage.text}
             onChange={(checked) => {
               if (checked) {
-                completeStage(stage.id, checked);
+                completeStage(stage.id);
               } else {
                 setCompletedStages((prev) => {
                   const newSet = new Set(prev);
