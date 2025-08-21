@@ -85,125 +85,189 @@ function Dropdown({
 
 const hexCodes = generateRandomHexCodes();
 
-function App() {
-  const [stage, setStage] = useState({
-    username: false,
-    email: false,
-    password: false,
-    colorSecurityQ: false,
-    gamblingSecurityQ: false,
+// Define stages configuration - easy to add, remove, or reorder!
+const stageConfig = [
+  {
+    id: "username",
+    type: "input",
+    placeholder: "Enter username",
+    validator: (value: string) => value.length > 0,
+  },
+  {
+    id: "email",
+    type: "input",
+    placeholder: "Enter email",
+    validator: (value: string) => {
+      const emailRegex =
+        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return emailRegex.test(value);
+    },
+  },
+  {
+    id: "password",
+    type: "input",
+    inputType: "password",
+    placeholder: "Enter password",
+    validator: (value: string) => value.length > 0,
+  },
+  {
+    id: "securityHeader",
+    type: "header",
+    text: "Security questions",
+  },
+  {
+    id: "colorSecurityQ",
+    type: "dropdown",
+    placeholder: "What's your favorite color?",
+    options: hexCodes,
+    validator: (value: string) => value.length > 0,
+  },
+  {
+    id: "gamblingSecurityQ",
+    type: "dropdown",
+    placeholder: "100,000$, Red or black",
+    options: ["Red", "Black", "gambling is bad"],
+    validator: (value: string) => value !== "gambling is bad",
+    onInvalidValue: (e: React.ChangeEvent<HTMLSelectElement>) => {
+      alert("wrong answer buddy");
+      e.target.value = "Red";
+    },
+  },
+  {
+    id: "tos",
+    type: "checkbox",
+    text: "I agree to the terms of service",
+  },
+  {
+    id: "pineappleOnPizza",
+    type: "checkbox",
+    text: "I agree that pineapple on pizza is good",
+  },
+  {
+    id: "signupButton",
+    type: "button",
+    text: "Sign up",
+    className: "bg-red-500 w-96 p-4 rounded-full",
+    onClick: () => {
+      setTimeout(() => {
+        alert("There has been an error. Please resubmit this form");
+        window.location.reload();
+      }, 5000);
+    },
+  },
+];
 
-    // checkboxes
-    tos: false,
-    pineappleOnPizza: false, // im sorry for this.
-  });
+function App() {
+  const [completedStages, setCompletedStages] = useState<Set<string>>(
+    new Set()
+  );
+  const [formData, setFormData] = useState<Record<string, any>>({});
+
+  const completeStage = (stageId: string, value?: any) => {
+    setCompletedStages((prev) => new Set([...prev, stageId]));
+    if (value !== undefined) {
+      setFormData((prev) => ({ ...prev, [stageId]: value }));
+    }
+  };
+
+  const isStageVisible = (index: number) => {
+    if (index === 0) return true;
+
+    // Check if all previous stages are completed
+    for (let i = 0; i < index; i++) {
+      const prevStage = stageConfig[i];
+      if (prevStage.type !== "header" && !completedStages.has(prevStage.id)) {
+        return false;
+      }
+    }
+    return true;
+  };
+
+  const renderStage = (stage: any, index: number) => {
+    if (!isStageVisible(index)) return null;
+
+    switch (stage.type) {
+      case "input":
+        return (
+          <Input
+            key={stage.id}
+            placeholder={stage.placeholder}
+            type={stage.inputType}
+            onChange={(e) => {
+              if (stage.validator(e.target.value)) {
+                completeStage(stage.id, e.target.value);
+              }
+            }}
+          />
+        );
+
+      case "dropdown":
+        return (
+          <Dropdown
+            key={stage.id}
+            placeholder={stage.placeholder}
+            options={stage.options}
+            onChange={(e) => {
+              if (stage.onInvalidValue && !stage.validator(e.target.value)) {
+                stage.onInvalidValue(e);
+                return;
+              }
+              if (stage.validator(e.target.value)) {
+                completeStage(stage.id, e.target.value);
+              }
+            }}
+          />
+        );
+
+      case "checkbox":
+        return (
+          <Checkbox
+            key={stage.id}
+            text={stage.text}
+            onChange={(checked) => {
+              if (checked) {
+                completeStage(stage.id, checked);
+              } else {
+                setCompletedStages((prev) => {
+                  const newSet = new Set(prev);
+                  newSet.delete(stage.id);
+                  return newSet;
+                });
+              }
+            }}
+            checked={completedStages.has(stage.id)}
+          />
+        );
+
+      case "header":
+        return (
+          <div key={stage.id} className="text-xl text-center mb-2">
+            {stage.text}
+          </div>
+        );
+
+      case "button":
+        return (
+          <button
+            key={stage.id}
+            className={stage.className}
+            onClick={stage.onClick}
+          >
+            {stage.text}
+          </button>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <main className="py-4 h-screen w-screen flex flex-col gap-8">
-      <h1 className="text-4xl text-center">Welcome to T̵̼͍̤̝̃͋̒͆H̴̬̭̹͖̙̽́̐͝͝E̴̖͕͉̥̎̈́ͅ ̶̻̣̏͛͛̊Ẅ̸̙͈͖̝̝́͐E̴̺̤͓͎̫̓B̵̢̖̎̒S̷̹̻͍̬̈́̃͑͠͝Ḭ̷̛T̸̘̬̭̹̱̊͆̕͝E̸͈̕</h1>
+      <h1 className="text-4xl text-center">Welcome to T̵̼͍̤̝̃͋̒͆H̴̬̭̹͖̙̽́̐͝͝E̴̖͕͉̥̎̈́ͅ ̶̻̣̏͛͛̊Ẅ̸̙͈͖̝̝́͐E̴̺̤͓͎̫̓B̵̢̖̎̒S̷̹̻͍̬̈́̃͑͠͝Ḭ̷̛T̸̘̬̭̹̱̊͆̕͝E̸͈̕</h1>
 
       <div className="w-full h-full flex flex-col items-center gap-4">
-        <Input
-          placeholder="Enter username"
-          onChange={(e) => {
-            if (e.target.value.length > 0) {
-              setStage({ ...stage, username: true });
-            }
-          }}
-        />
-
-        {stage.username && (
-          <Input
-            placeholder="Enter email"
-            onChange={(e) => {
-              const emailRegex =
-                /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-              // big thanks to https://emailregex.com/ for the regex
-
-              if (emailRegex.test(e.target.value)) {
-                setStage({ ...stage, email: true });
-              }
-            }}
-          />
-        )}
-
-        {stage.email && (
-          <Input
-            placeholder="Enter password"
-            type="password"
-            onChange={(e) => {
-              if (e.target.value.length > 0) {
-                setStage({ ...stage, password: true });
-              }
-            }}
-          />
-        )}
-
-        {stage.password && (
-          <div className="flex flex-col gap-4">
-            <div className="text-xl text-center mb-2">Security questions</div>
-
-            <Dropdown
-              placeholder="What's your favorite color?"
-              options={hexCodes}
-              onChange={(e) => {
-                setStage({ ...stage, colorSecurityQ: true });
-              }}
-            />
-
-            {stage.colorSecurityQ && (
-              <Dropdown
-                placeholder="100,000$, Red or black"
-                options={["Red", "Black", "gambling is bad"]}
-                onChange={(e) => {
-                  if (e.target.value == "gambling is bad") {
-                    alert("wrong answer buddy");
-
-                    e.target.value = "Red";
-
-                    return;
-                  }
-
-                  setStage({ ...stage, gamblingSecurityQ: true });
-                }}
-              />
-            )}
-          </div>
-        )}
-
-        {stage.gamblingSecurityQ && (
-          <Checkbox
-            text="I agree to the terms of service"
-            onChange={(checked) => {
-              setStage({ ...stage, tos: checked });
-            }}
-            checked={stage.tos}
-          />
-        )}
-        {stage.tos && (
-          <Checkbox
-            text="I agree that pineapple on pizza is good"
-            onChange={(checked) => {
-              setStage({ ...stage, pineappleOnPizza: checked });
-            }}
-            checked={stage.pineappleOnPizza}
-          />
-        )}
-
-        {stage.pineappleOnPizza && (
-          <button
-            className="bg-red-500 w-96 p-4 rounded-full"
-            onClick={() => {
-              setTimeout(() => {
-                alert("There has been an error. Please resubmit this form");
-
-                window.location.reload();
-              }, 5000);
-            }}
-          >
-            Sign up
-          </button>
-        )}
+        {stageConfig.map((stage, index) => renderStage(stage, index))}
       </div>
     </main>
   );

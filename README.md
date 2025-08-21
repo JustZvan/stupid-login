@@ -4,4 +4,4 @@ a very normal sign up site.
 
 inspired by the password game
 
-sorry for bad codebase
+copilot chat used for refactoring the codebase and the random hex codes
