@@ -111,6 +111,12 @@ const stageConfig = [
     validator: (value: string) => value.length > 0,
   },
   {
+    id: "catImageUpload",
+    type: "imageUpload",
+    placeholder: "Upload an image of a cat",
+    validator: (file: File | null) => !!file,
+  },
+  {
     id: "securityHeader",
     type: "header",
     text: "Security questions",
@@ -189,6 +195,30 @@ const stageConfig = [
       alert("Nope, try again!");
       e.target.value = "";
     },
+  },
+  {
+    id: "phoneNumber",
+    type: "input",
+    placeholder: "Enter your phone number",
+    validator: (value: string) => /^\+?[0-9\-\s]{7,15}$/.test(value),
+  },
+  {
+    id: "momsPhoneNumber",
+    type: "input",
+    placeholder: "Enter your mom's phone number",
+    validator: (value: string) => /^\+?[0-9\-\s]{7,15}$/.test(value),
+  },
+  {
+    id: "mozartBirthDate",
+    type: "input",
+    placeholder: "What is the birth date of Mozart? (YYYY-MM-DD)",
+    validator: (value: string) => value === "1756-01-27",
+  },
+  {
+    id: "coolguy",
+    type: "input",
+    placeholder: "Who is the coolest guy ever? (hint: JustZvan)",
+    validator: (value: string) => value === "JustZvan",
   },
   {
     id: "tos",
@@ -288,6 +318,24 @@ function App() {
             }}
             checked={completedStages.has(stage.id)}
           />
+        );
+
+      case "imageUpload":
+        return (
+          <div key={stage.id} className="flex flex-col items-center gap-2">
+            <label className="text-zinc-400 mb-2">{stage.placeholder}</label>
+            <input
+              type="file"
+              accept="image/*"
+              className="w-96 py-3 px-4 rounded-full bg-zinc-800 text-white"
+              onChange={(e) => {
+                const file = e.target.files && e.target.files[0];
+                if (stage.validator(file)) {
+                  completeStage(stage.id);
+                }
+              }}
+            />
+          </div>
         );
 
       case "header":
